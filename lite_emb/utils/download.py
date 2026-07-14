@@ -60,25 +60,38 @@ def ensure_model_downloaded(
     if settings.HF_HUB_ENABLE_HF_TRANSFER:
         os.environ["HF_HUB_ENABLE_HF_TRANSFER"] = "1"
 
+    # 优先尝试本地缓存，避免不必要的网络请求
+    try:
+        local_path = snapshot_download(
+            repo_id=model_id,
+            local_files_only=True,
+            allow_patterns=allow_patterns,
+        )
+        logger.info("模型就绪（本地缓存），路径: {}", local_path)
+        return local_path
+    except Exception:
+        pass
+
+    # 本地无缓存，检查是否强制离线
+    if local_files_only:
+        raise RuntimeError(
+            f"离线模式下未找到模型 {model_id} 的本地缓存文件。"
+            f"请先运行 'python preload.py' 下载模型，或设置 HF_HUB_OFFLINE=0 启用在线下载。"
+        )
+
     logger.info(
-        "正在检查模型: {} (离线模式: {}, 镜像: {})",
+        "本地无缓存，开始下载模型: {} (镜像: {})",
         model_id,
-        local_files_only,
         settings.HF_ENDPOINT,
     )
 
     try:
         local_path = snapshot_download(
             repo_id=model_id,
-            local_files_only=local_files_only,
+            local_files_only=False,
             allow_patterns=allow_patterns,
         )
-        logger.info("模型就绪，路径: {}", local_path)
+        logger.info("模型下载完成，路径: {}", local_path)
         return local_path
     except Exception as e:
-        if local_files_only:
-            raise RuntimeError(
-                f"离线模式下未找到模型 {model_id} 的本地缓存文件。"
-                f"请先运行 'python preload.py' 下载模型，或设置 HF_HUB_OFFLINE=0 启用在线下载。"
-            ) from e
         raise RuntimeError(f"下载模型 {model_id} 失败: {e}") from e
