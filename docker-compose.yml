@@ -1,0 +1,55 @@
+# lite-emb Docker Compose 编排
+# 用法:
+#   docker compose up -d          # 启动服务
+#   docker compose logs -f        # 查看日志
+#   docker compose down           # 停止服务
+
+services:
+  lite-emb:
+    build:
+      context: .
+      args:
+        # 设置为 true 可在构建时预下载模型
+        PRELOAD_MODEL: "false"
+    image: lite-emb:latest
+    container_name: lite-emb
+    ports:
+      - "8000:8000"
+    environment:
+      # 服务器配置
+      - DEV_HOST=0.0.0.0
+      - DEV_PORT=8000
+      # 模型配置
+      - MODEL_NAME=BAAI/bge-m3
+      - MAX_BATCH_SIZE=32
+      - MAX_SEQUENCE_LENGTH=8192
+      # 预加载
+      - PRELOAD_MODEL=true
+      - ALLOW_MODEL_SWITCH=false
+      # Embedding 配置
+      - EMBEDDING_NORMALIZE=true
+      # HuggingFace 配置
+      - HF_ENDPOINT=https://hf-mirror.com
+      - HF_HUB_ENABLE_HF_TRANSFER=true
+      - HF_HUB_OFFLINE=0
+      # 日志
+      - LOG_LEVEL=INFO
+      - LOG_FILE=logs/app.log
+    volumes:
+      # 持久化 HuggingFace 模型缓存（避免重复下载）
+      - hf_cache:/home/appuser/.cache/huggingface
+      # 持久化日志
+      - ./logs:/app/logs
+    restart: unless-stopped
+    # GPU 支持（需要 nvidia-container-toolkit）
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+volumes:
+  hf_cache:
+    driver: local
