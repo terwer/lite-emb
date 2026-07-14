@@ -2,7 +2,7 @@
 
 A lightweight, OpenAI-compatible embedding service powered by BGE-M3 and sentence-transformers.
 
-> 📄 [中文文档](./README_zh_CN.md)
+> 📄 [中文](./README_zh_CN.md)
 
 ## Features
 

@@ -2,6 +2,8 @@
 
 轻量级 OpenAI 兼容的 Embedding 服务，基于 BGE-M3 和 sentence-transformers。
 
+> 📄 [English](./README.md)
+
 ## 核心特性
 
 | 特性 | 说明 |
