@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     WORKERS: int = 1
 
     # -- 模型配置 --
-    MODEL_NAME: str = "all-minilm"
+    MODEL_NAME: str = "BAAI/bge-micro"
     MAX_BATCH_SIZE: int = 32
     MAX_SEQUENCE_LENGTH: int = 8192
 
