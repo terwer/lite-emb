@@ -71,4 +71,8 @@ def setup_logging() -> None:
     for lib in ("uvicorn", "uvicorn.error", "uvicorn.access", "httpx", "httpcore"):
         logging.getLogger(lib).handlers = [InterceptHandler()]
 
+    # 保留 huggingface_hub 的原生日志输出（含下载进度）
+    for lib in ("huggingface_hub", "huggingface_hub.file_download"):
+        logging.getLogger(lib).handlers = []
+
     logger.info("日志系统初始化完成，级别: {}", settings.LOG_LEVEL)
