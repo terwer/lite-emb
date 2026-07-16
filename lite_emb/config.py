@@ -31,7 +31,7 @@ class Settings(BaseSettings):
     EMBEDDING_NORMALIZE: bool = True
 
     # -- HuggingFace 配置 --
-    HF_ENDPOINT: str = "https://huggingface.co"
+    HF_ENDPOINT: str = "https://hf-mirror.com"
     HF_HUB_ENABLE_HF_TRANSFER: bool = True
     HF_HUB_OFFLINE: int = 0
 
