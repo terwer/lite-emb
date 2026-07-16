@@ -17,10 +17,19 @@ from loguru import logger
 from tqdm import tqdm
 
 from lite_emb.config import settings
-from lite_emb.models.registry import ModelRegistry
 
 _MODEL_FILES: dict[str, list[str]] = {
-    "BAAI/bge-micro": [
+    "intfloat/multilingual-e5-base": [
+        "config.json",
+        "model.safetensors",
+        "tokenizer.json",
+        "tokenizer_config.json",
+        "special_tokens_map.json",
+        "sentence_bert_config.json",
+        "modules.json",
+        "1_Pooling/config.json",
+    ],
+    "intfloat/multilingual-e5-small": [
         "config.json",
         "model.safetensors",
         "tokenizer.json",
@@ -31,6 +40,36 @@ _MODEL_FILES: dict[str, list[str]] = {
         "1_Pooling/config.json",
     ],
     "sentence-transformers/all-MiniLM-L6-v2": [
+        "config.json",
+        "model.safetensors",
+        "tokenizer.json",
+        "tokenizer_config.json",
+        "special_tokens_map.json",
+        "sentence_bert_config.json",
+        "modules.json",
+        "1_Pooling/config.json",
+    ],
+    "sentence-transformers/all-MiniLM-L12-v2": [
+        "config.json",
+        "model.safetensors",
+        "tokenizer.json",
+        "tokenizer_config.json",
+        "special_tokens_map.json",
+        "sentence_bert_config.json",
+        "modules.json",
+        "1_Pooling/config.json",
+    ],
+    "BAAI/bge-small-zh-v1.5": [
+        "config.json",
+        "model.safetensors",
+        "tokenizer.json",
+        "tokenizer_config.json",
+        "special_tokens_map.json",
+        "sentence_bert_config.json",
+        "modules.json",
+        "1_Pooling/config.json",
+    ],
+    "intfloat/multilingual-e5-small": [
         "config.json",
         "model.safetensors",
         "tokenizer.json",
@@ -116,7 +155,8 @@ def ensure_model_downloaded(
     allow_patterns: list[str] | None = None,
 ) -> str:
     """确保模型文件就绪，返回本地路径。"""
-    # 解析别名
+    # 解析别名（懒加载避免循环导入）
+    from lite_emb.models.registry import ModelRegistry
     model_id = ModelRegistry.resolve_model_id(model_id)
 
     if allow_patterns is None:

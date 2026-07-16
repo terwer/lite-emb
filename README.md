@@ -155,7 +155,7 @@ Any HuggingFace sentence-transformers compatible model works out of the box — 
 # Use any HuggingFace model directly
 curl -X POST http://localhost:8000/v1/embeddings \
   -H "Content-Type: application/json" \
-  -d '{"model": "intfloat/multilingual-e5-base", "input": "hello"}'
+  -d '{"model": "e5-base", "input": "hello"}'
 ```
 
 ## Model Management

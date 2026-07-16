@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     WORKERS: int = 1
 
     # -- 模型配置 --
-    MODEL_NAME: str = "BAAI/bge-micro"
+    MODEL_NAME: str = "e5-small"
     MAX_BATCH_SIZE: int = 32
     MAX_SEQUENCE_LENGTH: int = 8192
 

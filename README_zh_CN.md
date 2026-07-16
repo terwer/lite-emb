@@ -154,7 +154,7 @@ print(response.data[0].embedding)
 # 直接使用任意 HuggingFace 模型
 curl -X POST http://localhost:8000/v1/embeddings \
   -H "Content-Type: application/json" \
-  -d '{"model": "intfloat/multilingual-e5-base", "input": "hello"}'
+  -d '{"model": "e5-base", "input": "hello"}'
 ```
 
 ## 模型管理

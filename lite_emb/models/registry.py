@@ -99,6 +99,24 @@ class ModelRegistry:
             description="多语言 E5 大模型，支持 100+ 语言",
             tags=["multilingual", "dense", "e5"],
         ),
+        "intfloat/multilingual-e5-base": ModelInfo(
+            model_id="intfloat/multilingual-e5-base",
+            display_name="multilingual-e5-base",
+            dimension=768,
+            max_seq_length=512,
+            backend_type=BackendType.SENTENCE_TRANSFORMER,
+            description="多语言 E5 中等模型，支持 100+ 语言",
+            tags=["multilingual", "dense", "e5"],
+        ),
+        "intfloat/multilingual-e5-small": ModelInfo(
+            model_id="intfloat/multilingual-e5-small",
+            display_name="multilingual-e5-small",
+            dimension=384,
+            max_seq_length=512,
+            backend_type=BackendType.SENTENCE_TRANSFORMER,
+            description="多语言 E5 小模型，支持 100+ 语言，仅 120MB",
+            tags=["multilingual", "dense", "e5", "lightweight"],
+        ),
         "BAAI/bge-micro": ModelInfo(
             model_id="BAAI/bge-micro",
             display_name="bge-micro",
@@ -127,6 +145,8 @@ class ModelRegistry:
         "bge-small-zh": "BAAI/bge-small-zh-v1.5",
         "all-minilm": "sentence-transformers/all-MiniLM-L6-v2",
         "e5-large": "intfloat/multilingual-e5-large",
+        "e5-base": "intfloat/multilingual-e5-base",
+        "e5-small": "intfloat/multilingual-e5-small",
         "bge-micro": "BAAI/bge-micro",
         "all-minilm-l12": "sentence-transformers/all-MiniLM-L12-v2",
     }
