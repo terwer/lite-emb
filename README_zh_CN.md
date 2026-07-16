@@ -20,6 +20,21 @@
 | 🐳 **Docker 就绪** | 多阶段构建镜像，内置健康检查，compose 一键编排，HuggingFace 缓存持久化 volume |
 | 📝 **Swagger 文档** | 启动后访问 `/docs` 即获完整交互式 API 文档，所有 Schema 带 description 和 examples |
 
+## 性能对比
+
+在 Apple Silicon (MPS) 上，轻量级模型的吞吐量远超重型模型：
+
+| 模型 | 体积 | 维度 | 内存 | 吞吐量 | 适用场景 |
+|------|------|------|------|--------|----------|
+| `e5-small` | 120MB | 384 | ~0.1GB | ⚡ 极高 | 开发 / 低资源环境 |
+| `all-minilm` | 80MB | 384 | ~0.1GB | ⚡ 极高 | 纯英文场景 |
+| `bge-small-zh` | 95MB | 512 | ~0.1GB | ⚡ 高 | 中文场景 |
+| `e5-large` | 560MB | 1024 | ~0.5GB | 中等 | 高质量多语言 |
+| `bge-large-zh` | 390MB | 1024 | ~0.4GB | 中等 | 高质量中文 |
+| `bge-m3` | 2GB+ | 1024 | ~2GB | 🐌 慢 / 易OOM | 需要 dense+sparse+colbert 时 |
+
+> 💡 **建议**：默认使用 `e5-small`，384 维覆盖 100+ 语言，资源占用极小。
+
 ## API 端点
 
 | 方法 | 路径 | 说明 |

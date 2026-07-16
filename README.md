@@ -20,6 +20,21 @@ A lightweight, OpenAI-compatible embedding service powered by BGE-M3 and sentenc
 | 🐳 **Docker Ready** | Multi-stage Docker build, built-in health check, compose one-liner, persistent HuggingFace cache volume |
 | 📝 **Swagger Docs** | Visit `/docs` after startup for full interactive API docs — all schemas include descriptions and examples |
 
+## Performance Comparison
+
+On Apple Silicon (MPS), lightweight models deliver dramatically better throughput than heavy ones:
+
+| Model | Size | Dims | Memory | Throughput | Suitable For |
+|-------|------|------|--------|------------|--------------|
+| `e5-small` | 120MB | 384 | ~0.1GB | ⚡ Very High | 开发 / 低资源环境 |
+| `all-minilm` | 80MB | 384 | ~0.1GB | ⚡ Very High | 英文场景 |
+| `bge-small-zh` | 95MB | 512 | ~0.1GB | ⚡ High | 中文场景 |
+| `e5-large` | 560MB | 1024 | ~0.5GB | Medium | 高质量多语言 |
+| `bge-large-zh` | 390MB | 1024 | ~0.4GB | Medium | 高质量中文 |
+| `bge-m3` | 2GB+ | 1024 | ~2GB | 🐌 Slow / OOM | 需要 dense+sparse+colbert 时 |
+
+> 💡 **Recommendation**: Start with `e5-small` (default). It covers 100+ languages at 384-dim with minimal resource usage.
+
 ## API Endpoints
 
 | Method | Path | Description |
