@@ -137,8 +137,10 @@ print(response.data[0].embedding)
 | `bge-m3` | `BAAI/bge-m3` | 1024 | 8192 | BGEM3FlagModel | 100+ 语言 |
 | `bge-large-zh` | `BAAI/bge-large-zh-v1.5` | 1024 | 512 | SentenceTransformer | 中文 |
 | `bge-small-zh` | `BAAI/bge-small-zh-v1.5` | 512 | 512 | SentenceTransformer | 中文 |
-| `all-minilm` | `sentence-transformers/all-MiniLM-L6-v2` | 384 | 256 | SentenceTransformer | 英文 |
 | `e5-large` | `intfloat/multilingual-e5-large` | 1024 | 512 | SentenceTransformer | 100+ 语言 |
+| `all-minilm` | `sentence-transformers/all-MiniLM-L6-v2` | 384 | 256 | SentenceTransformer | 英文 |
+| `all-minilm-l12` | `sentence-transformers/all-MiniLM-L12-v2` | 384 | 256 | SentenceTransformer | 英文 |
+| `bge-micro` | `BAAI/bge-micro` | 384 | 512 | SentenceTransformer | 100+ 语言 (~17MB) |
 
 ### 自动发现
 

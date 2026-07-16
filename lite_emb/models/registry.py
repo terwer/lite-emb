@@ -99,6 +99,24 @@ class ModelRegistry:
             description="多语言 E5 大模型，支持 100+ 语言",
             tags=["multilingual", "dense", "e5"],
         ),
+        "BAAI/bge-micro": ModelInfo(
+            model_id="BAAI/bge-micro",
+            display_name="bge-micro",
+            dimension=384,
+            max_seq_length=512,
+            backend_type=BackendType.SENTENCE_TRANSFORMER,
+            description="BGE 超轻量多语言模型，仅 17MB",
+            tags=["multilingual", "dense", "ultralight"],
+        ),
+        "sentence-transformers/all-MiniLM-L12-v2": ModelInfo(
+            model_id="sentence-transformers/all-MiniLM-L12-v2",
+            display_name="all-MiniLM-L12-v2",
+            dimension=384,
+            max_seq_length=256,
+            backend_type=BackendType.SENTENCE_TRANSFORMER,
+            description="轻量英文嵌入模型 L12 版本",
+            tags=["english", "dense", "lightweight"],
+        ),
     }
 
     # 模型 ID 到别名的映射（用于请求中的 model 参数）
@@ -109,6 +127,8 @@ class ModelRegistry:
         "bge-small-zh": "BAAI/bge-small-zh-v1.5",
         "all-minilm": "sentence-transformers/all-MiniLM-L6-v2",
         "e5-large": "intfloat/multilingual-e5-large",
+        "bge-micro": "BAAI/bge-micro",
+        "all-minilm-l12": "sentence-transformers/all-MiniLM-L12-v2",
     }
 
     @classmethod
