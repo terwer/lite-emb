@@ -17,6 +17,7 @@ from loguru import logger
 from tqdm import tqdm
 
 from lite_emb.config import settings
+from lite_emb.models.registry import ModelRegistry
 
 _MODEL_FILES: dict[str, list[str]] = {
     "BAAI/bge-micro": [
@@ -115,6 +116,9 @@ def ensure_model_downloaded(
     allow_patterns: list[str] | None = None,
 ) -> str:
     """确保模型文件就绪，返回本地路径。"""
+    # 解析别名
+    model_id = ModelRegistry.resolve_model_id(model_id)
+
     if allow_patterns is None:
         allow_patterns = DEFAULT_ALLOW_PATTERNS
 
