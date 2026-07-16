@@ -157,15 +157,7 @@ class SentenceTransformerLoader(EmbeddingBackend):
             use_fp16,
         )
 
-        model_kwargs = {}
-        if device == "mps":
-            model_kwargs["device"] = "mps"
-            # MPS 上推荐使用 float32 (sentence-transformers 对 MPS 的 auto 支持不稳定)
-            self._model = SentenceTransformer(
-                model_path, device="mps", model_kwargs=model_kwargs
-            )
-        else:
-            self._model = SentenceTransformer(model_path, device=device)
+        self._model = SentenceTransformer(model_path, device=device)
 
         # 获取向量维度
         self._dimension = self._model.get_sentence_embedding_dimension()
