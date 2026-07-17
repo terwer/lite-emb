@@ -37,6 +37,51 @@
 
 > 💡 **建议**：Embedding 用 `e5-small`，Rerank 用 `bge-reranker-base`。`python preload.py` 一次下载两个。
 
+## Rerank 模式对比
+
+服务支持两种 Rerank 模式 — **cosine**（基于 Embedding，秒回）和 **cross-encoder**（专业 Reranker，高精度）。以下示例展示两者在同一查询上的关键差异。
+
+> 💡 执行 `./compare_rerank.sh` 可在你的机器上重现这些结果。
+
+### 测试1：关键词重叠但语义无关
+
+查询：**"How to lose weight effectively?"**
+
+| # | 文档 | Cosine (e5-small) | Cross-encoder (bge-reranker) |
+|---|------|-------------------|------------------------------|
+| 1 | Exercise 30 minutes daily and eat less sugar | 0.8789 ✅ | 5.4955 ✅ |
+| 2 | My friend tried everything but still failed to lose weight | 0.8429 | **-4.4139** |
+| 3 | The price of Bitcoin dropped 5% today | 0.7811 | **-10.1932** |
+
+> 🔍 **Cosine**：三条得分挤在 0.78–0.88 窄区间内 — 无法有效惩罚无关的比特币文档，因为文本间存在表面特征重叠。
+> 🎯 **Cross-encoder**：分差达 15.69 — 清晰地区分相关 (+5.50) 和不相关 (-10.19)，Top-1 选择毫无歧义。
+
+### 测试2：中英文混合，语义精确匹配
+
+查询：**"苹果公司最新产品是什么？"**
+
+| # | 文档 | Cosine (e5-small) | Cross-encoder (bge-reranker) |
+|---|------|-------------------|------------------------------|
+| 1 | Apple announced the new iPhone 16 with AI features | 0.8455 | **-0.7275** ✅ |
+| 2 | 苹果是一种营养丰富的水果，含有丰富的维生素C | **0.8720** ❌ | -3.5546 |
+| 3 | 今天天气很好适合出去玩 | 0.8202 | -10.1942 |
+
+> 🔍 **Cosine 把水果排在 iPhone 前面！** 水果文档 (0.8720) 得分高于正确答案 (0.8455) — 因为 cosine 将文档视为词袋，"苹果"一词在查询和水果文档中都高频出现，导致误判。
+> 🎯 **Cross-encoder** 正确地将 iPhone 发布置顶，理解"苹果公司"指的是企业而非水果。
+
+### 核心结论
+
+| 维度 | Cosine (e5-small) | Cross-encoder (bge-reranker-base) |
+|------|-------------------|-----------------------------------|
+| 速度 | ⚡ 极快 (~10ms) | 🐢 较慢 (~200ms/对) |
+| 内存 | 免费（复用 Embedding 模型） | 额外 ~1GB |
+| 分值范围 | [-1, 1]（余弦相似度） | 无界（原始 logit） |
+| 区分能力 | 弱 — 得分高度集中 | 强 — 分差显著 |
+| 适用场景 | 快速过滤、头部查询 | 精准排序、长尾查询 |
+| 歧义处理 | 弱 — "苹果" = 水果 | 强 — "苹果公司" = Apple Inc. |
+
+> 💡 **建议**：用 cosine 对大候选集做快速预筛，再用 cross-encoder 对 Top-N 做精准重排。`compare_rerank.sh` 脚本帮你评估哪种模式更适合你的场景。
+
 ## API 端点
 
 | 方法 | 路径 | 说明 |

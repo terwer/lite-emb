@@ -37,6 +37,51 @@ On Apple Silicon (MPS), lightweight models deliver dramatically better throughpu
 
 > 💡 **Recommendation**: Start with `e5-small` (default) for embeddings, `bge-reranker-base` for reranking. Both pre-loaded by `python preload.py`.
 
+## Rerank Mode Comparison
+
+The service supports two rerank modes — **cosine** (embedding-based, instant) and **cross-encoder** (dedicated reranker, high accuracy). The examples below demonstrate the critical difference on the same query.
+
+> 💡 Run `./compare_rerank.sh` to reproduce these results on your own machine.
+
+### Test 1: Keyword overlap, semantically unrelated
+
+Query: **"How to lose weight effectively?"**
+
+| # | Document | Cosine (e5-small) | Cross-encoder (bge-reranker) |
+|---|----------|-------------------|------------------------------|
+| 1 | Exercise 30 minutes daily and eat less sugar | 0.8789 ✅ | 5.4955 ✅ |
+| 2 | My friend tried everything but still failed to lose weight | 0.8429 | **-4.4139** |
+| 3 | The price of Bitcoin dropped 5% today | 0.7811 | **-10.1932** |
+
+> 🔍 **Cosine**: all three scores cluster in a narrow range (0.78–0.88) — the model struggles to penalize the irrelevant Bitcoin doc because it shares surface-level features with the other texts.
+> 🎯 **Cross-encoder**: score spread is 15.69 points — clearly separates relevant (+5.50) from irrelevant (-10.19), making top-1 selection unambiguous.
+
+### Test 2: Chinese/English mixed, semantic precision
+
+Query: **"苹果公司最新产品是什么？"** (What is Apple's latest product?)
+
+| # | Document | Cosine (e5-small) | Cross-encoder (bge-reranker) |
+|---|----------|-------------------|------------------------------|
+| 1 | Apple announced the new iPhone 16 with AI features | 0.8455 | **-0.7275** ✅ |
+| 2 | 苹果是一种营养丰富的水果，含有丰富的维生素C | **0.8720** ❌ | -3.5546 |
+| 3 | 今天天气很好适合出去玩 | 0.8202 | -10.1942 |
+
+> 🔍 **Cosine ranks fruit above iPhone!** The fruit doc (0.8720) outscores the correct answer (0.8455) — because cosine similarity treats all documents as bags of words and "苹果" (apple) appears heavily in both the query and the fruit doc.
+> 🎯 **Cross-encoder** correctly places the iPhone announcement first, understanding that "苹果公司" (Apple Inc.) refers to the company, not the fruit.
+
+### Key Takeaways
+
+| Dimension | Cosine (e5-small) | Cross-encoder (bge-reranker-base) |
+|-----------|-------------------|-----------------------------------|
+| Speed | ⚡ Instant (~10ms) | 🐢 Slower (~200ms per pair) |
+| Memory | Free (reuses embedding model) | ~1GB extra |
+| Score range | [-1, 1] (cosine similarity) | Unbounded (raw logit) |
+| Discriminative power | Low — scores cluster tightly | High — wide score spread |
+| Best for | Quick filtering, head queries | Precision reranking, tail queries |
+| Ambiguity handling | Weak — "苹果" = fruit | Strong — "苹果公司" = Apple Inc. |
+
+> 💡 **Recommendation**: Use cosine for fast pre-filtering of large candidate sets, then cross-encoder for precise top-N reranking. The `compare_rerank.sh` script helps you evaluate which mode fits your use case.
+
 ## API Endpoints
 
 | Method | Path | Description |
