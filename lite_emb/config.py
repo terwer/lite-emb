@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     MAX_SEQUENCE_LENGTH: int = 8192
 
     # -- 预加载配置 --
-    PRELOAD_MODEL: bool = False
+    PRELOAD_MODEL: bool = True
     ALLOW_MODEL_SWITCH: bool = False
 
     # -- Embedding 配置 --
