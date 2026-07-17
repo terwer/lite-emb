@@ -8,10 +8,11 @@
 
 | 特性 | 说明 |
 |------|------|
-| 🔌 **OpenAI 兼容** | `/v1/embeddings` 请求/响应格式完全对齐 OpenAI API，可直接替换 OpenAI SDK，零改动迁移 |
+| 🔌 **OpenAI Embedding** | `/v1/embeddings` 对齐 OpenAI API，可直接替换 OpenAI SDK，零改动迁移 |
+| 🔍 **Cohere Rerank** | `/v1/rerank` 端点，Cohere 兼容。双模式：cosine 轻量排序 / cross-encoder (`bge-reranker-base`) 高精度 |
 | 🧠 **双后端引擎** | BGE-M3 走 FlagEmbedding 原生后端（dense 1024 维），通用模型走 SentenceTransformer，自动按模型类型选择最优加载器 |
-| 🌍 **通用模型兼容** | 预注册 5 个主流模型（BGE-M3 / BGE-large-zh / BGE-small-zh / all-MiniLM / multilingual-e5），未知模型自动走 SentenceTransformer 发现 |
-| 📦 **自动下载** | 首次请求时自动从 HuggingFace 下载模型到本地缓存，默认走 hf-mirror.com 国内镜像，支持 hf-transfer 高速并行传输 |
+| 🌍 **通用模型兼容** | 预注册 8+ 个主流模型（Embedding：e5 系列、BGE 系列、MiniLM；Reranker：bge-reranker-base），未知模型自动发现 |
+| 📦 **自动下载** | CDN + aria2c 带实时进度条下载，缓存本地，一次下载永不再下 |
 | 🔄 **热切换** | 请求中指定不同 `model` 参数即可自动切换，通过 `ALLOW_MODEL_SWITCH` 控制开关（生产环境建议关闭） |
 | 🎯 **多设备适配** | 启动时自动检测 CUDA → MPS → CPU，GPU/MPS 自动启用 fp16，CPU 使用 fp32 |
 | 💤 **懒加载** | 默认不在启动时加载模型，首次 API 请求触发加载。可通过 `PRELOAD_MODEL=true` 改为启动预加载 |

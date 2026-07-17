@@ -8,10 +8,11 @@ A lightweight, OpenAI-compatible embedding & rerank service. Embedding aligns wi
 
 | Feature | Description |
 |---------|-------------|
-| 🔌 **OpenAI Compatible** | Drop-in replacement for OpenAI's `/v1/embeddings` — same request/response format, works with the official Python SDK with zero code changes |
+| 🔌 **OpenAI Embedding** | Drop-in replacement for OpenAI `/v1/embeddings` — works with the official Python SDK with zero code changes |
+| 🔍 **Cohere Rerank** | `/v1/rerank` endpoint, Cohere-compatible. Dual-mode: cosine (lightweight) or cross-encoder (`bge-reranker-base`, 1GB) for high accuracy |
 | 🧠 **Dual Backend** | BGE-M3 via FlagEmbedding (dense 1024-dim), general models via SentenceTransformer — auto-selects the optimal loader per model type |
-| 🌍 **Broad Model Support** | 5 pre-registered models (BGE-M3 / BGE-large-zh / BGE-small-zh / all-MiniLM / multilingual-e5), plus auto-discovery for any HuggingFace sentence-transformers model |
-| 📦 **Auto Download** | Downloads models from HuggingFace on first request, cached locally. Uses hf-mirror.com by default for faster downloads in China, with hf-transfer for parallel transfer |
+| 🌍 **Broad Model Support** | 8+ pre-registered models (Embedding: e5-small/large, BGE series, MiniLM; Reranker: bge-reranker-base), plus auto-discovery for any HuggingFace model |
+| 📦 **Auto Download** | Downloads models via CDN + aria2c with real-time progress bars. Cached locally, never re-downloads |
 | 🔄 **Hot Swap** | Switch models on the fly by passing a different `model` parameter. Controlled via `ALLOW_MODEL_SWITCH` (recommended off in production) |
 | 🎯 **Device Auto-detect** | CUDA → MPS → CPU, with fp16 on GPU/MPS and fp32 on CPU |
 | 💤 **Lazy Loading** | Models load on first API request by default. Set `PRELOAD_MODEL=true` for eager loading at startup |
