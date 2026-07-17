@@ -1,6 +1,6 @@
 # lite-emb
 
-轻量级 OpenAI 兼容的 Embedding 服务，基于 BGE-M3 和 sentence-transformers。
+轻量级 Embedding & Rerank 服务，Embedding 对齐 OpenAI `/v1/embeddings`，Rerank 对齐 Cohere `/v1/rerank`。
 
 > 📄 [English](./README.md)
 

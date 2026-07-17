@@ -1,6 +1,6 @@
 # lite-emb
 
-A lightweight, OpenAI-compatible embedding service powered by BGE-M3 and sentence-transformers.
+A lightweight, OpenAI-compatible embedding & rerank service. Embedding aligns with OpenAI `/v1/embeddings`, rerank aligns with Cohere `/v1/rerank`.
 
 > 📄 [中文](./README_zh_CN.md)
 

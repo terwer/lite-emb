@@ -1,7 +1,7 @@
 [project]
 name = "lite-emb"
 version = "0.1.0"
-description = "Lightweight OpenAI-compatible embedding service powered by BGE-M3 and sentence-transformers"
+description = "Lightweight embedding & rerank service — OpenAI /v1/embeddings + Cohere /v1/rerank"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [

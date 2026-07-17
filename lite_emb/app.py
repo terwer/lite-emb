@@ -69,7 +69,7 @@ def create_app() -> FastAPI:
     """
     app = FastAPI(
         title="lite-emb",
-        description="Lightweight OpenAI-compatible embedding service powered by BGE-M3 and sentence-transformers",
+        description="Lightweight embedding & rerank service — OpenAI /v1/embeddings + Cohere /v1/rerank",
         version="0.1.0",
         lifespan=lifespan,
         docs_url="/docs",
