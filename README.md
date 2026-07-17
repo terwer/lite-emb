@@ -32,8 +32,9 @@ On Apple Silicon (MPS), lightweight models deliver dramatically better throughpu
 | `e5-large` | 560MB | 1024 | ~0.5GB | Medium | 高质量多语言 |
 | `bge-large-zh` | 390MB | 1024 | ~0.4GB | Medium | 高质量中文 |
 | `bge-m3` | 2GB+ | 1024 | ~2GB | 🐌 Slow / OOM | 需要 dense+sparse+colbert 时 |
+| `bge-reranker-base` | 1GB | - | ~1GB | Medium | Reranker 专用 cross-encoder |
 
-> 💡 **Recommendation**: Start with `e5-small` (default). It covers 100+ languages at 384-dim with minimal resource usage.
+> 💡 **Recommendation**: Start with `e5-small` (default) for embeddings, `bge-reranker-base` for reranking. Both pre-loaded by `python preload.py`.
 
 ## API Endpoints
 
@@ -43,6 +44,7 @@ On Apple Silicon (MPS), lightweight models deliver dramatically better throughpu
 | `GET` | `/health` | Health check: `{"status": "healthy"}` |
 | `GET` | `/v1/models` | List models (OpenAI-compatible format) |
 | `POST` | `/v1/embeddings` | Generate embeddings (fully OpenAI-compatible) |
+| `POST` | `/v1/rerank` | Rerank documents by query relevance (Cohere-compatible) |
 | `GET` | `/docs` | Swagger UI |
 | `GET` | `/redoc` | ReDoc |
 | `GET` | `/openapi.json` | OpenAPI spec |
@@ -78,31 +80,61 @@ On Apple Silicon (MPS), lightweight models deliver dramatically better throughpu
 }
 ```
 
-## Quick Start
+### Rerank Request & Response
 
-### 1. Install Dependencies
+Dual-mode: **cosine** (lightweight, uses embedding model) or **cross-encoder** (professional reranker).
 
-```bash
-cd lite-emb
-uv sync
+```json
+// Request: POST /v1/rerank
+{
+  "model": "bge-reranker-base",
+  "query": "What is machine learning?",
+  "documents": [
+    "Deep learning is a subset of ML",
+    "The weather is nice today",
+    "Machine learning is a branch of AI"
+  ]
+}
+
+// Response
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "model": "bge-reranker-base",
+  "results": [
+    {"index": 2, "relevance_score": 0.98, "document": "Machine learning is a branch of AI"},
+    {"index": 0, "relevance_score": 0.82, "document": "Deep learning is a subset of ML"},
+    {"index": 1, "relevance_score": 0.12, "document": "The weather is nice today"}
+  ],
+  "meta": {"api_version": "1.0"}
+}
 ```
 
-### 2. Configure (Optional)
+## Quick Start
+
+> ⚠️ **Run preload first!** Downloads both embedding and reranker models (~1.2GB total). Skip this and the first API call will block until the download completes.
+
+```bash
+# 1. Download models (required — do this before starting!)
+cd lite-emb
+uv sync
+python preload.py
+```
+
+```bash
+# 2. Start the server
+uv run python main.py
+```
+
+Optional: customize models or port in `.env`:
 
 ```bash
 cp .env.example .env
-# Edit .env to change the default model, port, etc.
-```
-
-### 3. Start the Server
-
-```bash
-uv run python main.py
+# Edit .env to change MODEL_NAME, DEV_PORT, etc.
 ```
 
 The service runs at `http://localhost:8000`. Visit `/docs` for interactive API docs.
 
-### 4. Test the API
+### 3. Test the API
 
 ```bash
 # Health check
@@ -123,9 +155,19 @@ curl -X POST http://localhost:8000/v1/embeddings \
 curl -X POST http://localhost:8000/v1/embeddings \
   -H "Content-Type: application/json" \
   -d '{"model": "bge-m3", "input": ["text one", "text two", "text three"]}'
+
+# Rerank (cosine mode — instant)
+curl -X POST http://localhost:8000/v1/rerank \
+  -H "Content-Type: application/json" \
+  -d '{"model":"e5-small","query":"What is ML","documents":["Deep learning","Nice weather","AI branch"]}'
+
+# Rerank (cross-encoder mode — higher accuracy)
+curl -X POST http://localhost:8000/v1/rerank \
+  -H "Content-Type: application/json" \
+  -d '{"model":"bge-reranker-base","query":"What is ML","documents":["Deep learning","Nice weather","AI branch"]}'
 ```
 
-### 5. Use with OpenAI SDK (Drop-in Replacement)
+### 4. Use with OpenAI SDK (Drop-in Replacement)
 
 ```python
 from openai import OpenAI

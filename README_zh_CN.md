@@ -32,8 +32,9 @@
 | `e5-large` | 560MB | 1024 | ~0.5GB | 中等 | 高质量多语言 |
 | `bge-large-zh` | 390MB | 1024 | ~0.4GB | 中等 | 高质量中文 |
 | `bge-m3` | 2GB+ | 1024 | ~2GB | 🐌 慢 / 易OOM | 需要 dense+sparse+colbert 时 |
+| `bge-reranker-base` | 1GB | - | ~1GB | 中等 | Rerank 专用 cross-encoder |
 
-> 💡 **建议**：默认使用 `e5-small`，384 维覆盖 100+ 语言，资源占用极小。
+> 💡 **建议**：Embedding 用 `e5-small`，Rerank 用 `bge-reranker-base`。`python preload.py` 一次下载两个。
 
 ## API 端点
 
@@ -43,6 +44,7 @@
 | `GET` | `/health` | 健康检查：`{"status": "healthy"}` |
 | `GET` | `/v1/models` | 模型列表（OpenAI 兼容格式） |
 | `POST` | `/v1/embeddings` | 生成 Embedding（完全兼容 OpenAI API） |
+| `POST` | `/v1/rerank` | 按查询相关性重排文档（Cohere 兼容） |
 | `GET` | `/docs` | Swagger UI 交互式文档 |
 | `GET` | `/redoc` | ReDoc 文档 |
 | `GET` | `/openapi.json` | OpenAPI 规范 JSON |
@@ -78,31 +80,61 @@
 }
 ```
 
-## 快速开始
+### Rerank 请求与响应
 
-### 1. 安装依赖
+双模式：**cosine**（轻量，复用 Embedding 模型）或 **cross-encoder**（专业 Reranker）。
 
-```bash
-cd /Volumes/workspace/myproject/lite-emb
-uv sync
+```json
+// 请求: POST /v1/rerank
+{
+  "model": "bge-reranker-base",
+  "query": "什么是机器学习？",
+  "documents": [
+    "深度学习是ML的子集",
+    "今天天气不错",
+    "机器学习是AI分支"
+  ]
+}
+
+// 响应
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "model": "bge-reranker-base",
+  "results": [
+    {"index": 2, "relevance_score": 0.98, "document": "机器学习是AI分支"},
+    {"index": 0, "relevance_score": 0.82, "document": "深度学习是ML的子集"},
+    {"index": 1, "relevance_score": 0.12, "document": "今天天气不错"}
+  ],
+  "meta": {"api_version": "1.0"}
+}
 ```
 
-### 2. 配置（可选）
+## 快速开始
+
+> ⚠️ **必须先运行 preload！** 下载 Embedding + Rerank 两个模型（约 1.2GB）。跳过这步首次 API 调用会阻塞等待下载完成。
+
+```bash
+# 1. 下载模型（必须先执行！）
+cd lite-emb
+uv sync
+python preload.py
+```
+
+```bash
+# 2. 启动服务
+uv run python main.py
+```
+
+可选：通过 `.env` 自定义模型或端口：
 
 ```bash
 cp .env.example .env
-# 编辑 .env 修改默认模型、端口等
-```
-
-### 3. 启动服务
-
-```bash
-uv run python main.py
+# 编辑 .env 修改 MODEL_NAME、DEV_PORT 等
 ```
 
 服务默认运行在 `http://localhost:8000`，访问 `/docs` 查看交互式 API 文档。
 
-### 4. 测试 API
+### 3. 测试 API
 
 ```bash
 # 健康检查
@@ -117,15 +149,25 @@ curl http://localhost:8000/v1/models
 # 单条文本 Embedding
 curl -X POST http://localhost:8000/v1/embeddings \
   -H "Content-Type: application/json" \
-  -d '{"model": "bge-m3", "input": "你好，这是一个测试文本"}'
+  -d '{"model": "e5-small", "input": "你好，这是一个测试文本"}'
 
 # 批量文本 Embedding
 curl -X POST http://localhost:8000/v1/embeddings \
   -H "Content-Type: application/json" \
-  -d '{"model": "bge-m3", "input": ["文本一", "文本二", "文本三"]}'
+  -d '{"model": "e5-small", "input": ["文本一", "文本二", "文本三"]}'
+
+# Rerank（cosine 模式 — 秒回）
+curl -X POST http://localhost:8000/v1/rerank \
+  -H "Content-Type: application/json" \
+  -d '{"model":"e5-small","query":"什么是机器学习","documents":["深度学习","天气不错","AI分支"]}'
+
+# Rerank（cross-encoder 模式 — 高精度）
+curl -X POST http://localhost:8000/v1/rerank \
+  -H "Content-Type: application/json" \
+  -d '{"model":"bge-reranker-base","query":"什么是机器学习","documents":["深度学习","天气不错","AI分支"]}'
 ```
 
-### 5. 使用 OpenAI SDK（零改动替换）
+### 4. 使用 OpenAI SDK（零改动替换）
 
 ```python
 from openai import OpenAI
