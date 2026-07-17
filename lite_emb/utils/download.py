@@ -65,7 +65,6 @@ _MODEL_FILES: dict[str, list[str]] = {
         "tokenizer.json",
         "tokenizer_config.json",
         "special_tokens_map.json",
-        "sentence_bert_config.json",
     ],
     "BAAI/bge-small-zh-v1.5": [
         "config.json",
