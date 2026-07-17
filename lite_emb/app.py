@@ -17,7 +17,7 @@ from loguru import logger
 from lite_emb.config import settings
 from lite_emb.logger import setup_logging
 from lite_emb.models.manager import model_manager
-from lite_emb.routers import embeddings, health, models
+from lite_emb.routers import embeddings, health, models, rerank
 from lite_emb.utils.device import get_device_and_precision
 
 
@@ -90,6 +90,7 @@ def create_app() -> FastAPI:
     app.include_router(health.router)
     app.include_router(models.router)
     app.include_router(embeddings.router)
+    app.include_router(rerank.router)
 
     # 全局异常处理器
     @app.exception_handler(ValueError)

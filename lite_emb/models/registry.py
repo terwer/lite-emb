@@ -15,7 +15,10 @@ class BackendType(str, Enum):
     """BGE-M3 专用后端，使用 FlagEmbedding.BGEM3FlagModel"""
 
     SENTENCE_TRANSFORMER = "sentence_transformer"
-    """通用 sentence-transformers 后端""" ""
+    """通用 sentence-transformers 后端"""
+
+    RERANKER = "reranker"
+    """Cross-encoder reranker 后端，使用 FlagEmbedding.FlagReranker"""
 
 
 @dataclass
@@ -117,6 +120,15 @@ class ModelRegistry:
             description="多语言 E5 小模型，支持 100+ 语言，仅 120MB",
             tags=["multilingual", "dense", "e5", "lightweight"],
         ),
+        "BAAI/bge-reranker-base": ModelInfo(
+            model_id="BAAI/bge-reranker-base",
+            display_name="bge-reranker-base",
+            dimension=0,  # cross-encoder 无固定维度
+            max_seq_length=512,
+            backend_type=BackendType.RERANKER,
+            description="BGE Cross-Encoder Reranker，中英文重排序",
+            tags=["multilingual", "chinese", "english", "reranker", "cross-encoder"],
+        ),
         "BAAI/bge-micro": ModelInfo(
             model_id="BAAI/bge-micro",
             display_name="bge-micro",
@@ -149,6 +161,7 @@ class ModelRegistry:
         "e5-small": "intfloat/multilingual-e5-small",
         "bge-micro": "BAAI/bge-micro",
         "all-minilm-l12": "sentence-transformers/all-MiniLM-L12-v2",
+        "bge-reranker-base": "BAAI/bge-reranker-base",
     }
 
     @classmethod
@@ -208,6 +221,10 @@ class ModelRegistry:
         # 自动发现：BGE-M3 系列使用 BGE_M3 后端
         if "bge-m3" in model_id.lower():
             return BackendType.BGE_M3
+
+        # 自动发现：Reranker 模型
+        if "reranker" in model_id.lower():
+            return BackendType.RERANKER
 
         # 默认使用 SentenceTransformer
         return BackendType.SENTENCE_TRANSFORMER

@@ -30,6 +30,11 @@ class Settings(BaseSettings):
     # -- Embedding 配置 --
     EMBEDDING_NORMALIZE: bool = True
 
+    # -- Rerank 配置 --
+    RERANK_MODEL_NAME: str = "BAAI/bge-reranker-base"
+    RERANK_MAX_BATCH: int = 32
+    RERANK_DEFAULT_TOP_N: int = 10
+
     # -- HuggingFace 配置 --
     HF_ENDPOINT: str = "https://hf-mirror.com"
     HF_HUB_ENABLE_HF_TRANSFER: bool = True

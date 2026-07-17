@@ -59,6 +59,14 @@ _MODEL_FILES: dict[str, list[str]] = {
         "modules.json",
         "1_Pooling/config.json",
     ],
+    "BAAI/bge-reranker-base": [
+        "config.json",
+        "pytorch_model.bin",
+        "tokenizer.json",
+        "tokenizer_config.json",
+        "special_tokens_map.json",
+        "sentence_bert_config.json",
+    ],
     "BAAI/bge-small-zh-v1.5": [
         "config.json",
         "model.safetensors",

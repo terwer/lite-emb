@@ -189,14 +189,39 @@ class SentenceTransformerLoader(EmbeddingBackend):
         return np.array(embeddings)
 
 
+class RerankerBackend:
+    """Cross-encoder Reranker 后端，使用 FlagEmbedding.FlagReranker。"""
+
+    def __init__(self) -> None:
+        self._model = None
+
+    def load(self, model_path: str, device: str, use_fp16: bool) -> None:
+        """加载 Reranker 模型。"""
+        from FlagEmbedding import FlagReranker
+
+        logger.info("正在加载 Reranker 模型: {} (设备: {})", model_path, device)
+        self._model = FlagReranker(
+            model_path,
+            use_fp16=False,  # CPU 上关闭 fp16
+            device=device,
+        )
+
+    def compute_score(self, pairs: list[list[str]]) -> list[float]:
+        """计算 (query, document) 对的相关性分数。"""
+        if self._model is None:
+            raise RuntimeError("Reranker 模型尚未加载")
+        return self._model.compute_score(pairs)
+
+
 # 后端工厂函数
 BACKEND_CLASS_MAP = {
     BackendType.BGE_M3: BGEM3Loader,
     BackendType.SENTENCE_TRANSFORMER: SentenceTransformerLoader,
+    BackendType.RERANKER: RerankerBackend,
 }
 
 
-def create_backend(backend_type: BackendType) -> EmbeddingBackend:
+def create_backend(backend_type: BackendType) -> EmbeddingBackend | RerankerBackend:
     """
     根据后端类型创建加载器实例。
 
@@ -204,7 +229,7 @@ def create_backend(backend_type: BackendType) -> EmbeddingBackend:
         backend_type: 后端类型枚举值
 
     Returns:
-        EmbeddingBackend: 后端实例
+        后端实例
 
     Raises:
         ValueError: 不支持的后端类型
