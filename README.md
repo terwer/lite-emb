@@ -15,7 +15,7 @@ A lightweight, OpenAI-compatible embedding & rerank service. Embedding aligns wi
 | 📦 **Auto Download** | Downloads models via CDN + aria2c with real-time progress bars. Cached locally, never re-downloads |
 | 🔄 **Hot Swap** | Switch models on the fly by passing a different `model` parameter. Controlled via `ALLOW_MODEL_SWITCH` (recommended off in production) |
 | 🎯 **Device Auto-detect** | CUDA → MPS → CPU, with fp16 on GPU/MPS and fp32 on CPU |
-| 💤 **Lazy Loading** | Models load on first API request by default. Set `PRELOAD_MODEL=true` for eager loading at startup |
+| 💤 **Eager Loading** | Models preload at startup by default (`PRELOAD_MODEL=true`). Set to `false` for lazy loading on first request |
 | 🧵 **Thread Safe** | `threading.Lock` guards model load/unload critical sections. PyTorch inference is natively thread-safe for concurrent requests |
 | 📐 **Dimension Truncation** | Supports OpenAI's `dimensions` parameter — truncate vectors to the first N dimensions for downstream storage needs |
 | 🐳 **Docker Ready** | Multi-stage Docker build, built-in health check, compose one-liner, persistent HuggingFace cache volume |
@@ -252,7 +252,7 @@ Request arrives at POST /v1/embeddings
 | Development | `uv run python main.py` | Local dev, single process |
 | Hot Reload | `uv run uvicorn lite_emb.app:app --reload` | Auto-reload on code changes |
 | Multi-worker | `WORKERS=4 uv run python main.py` | Multi-core concurrency |
-| Eager Loading | `PRELOAD_MODEL=true uv run python main.py` | Avoid cold-start latency |
+| Lazy Loading | `PRELOAD_MODEL=false uv run python main.py` | Defer model loading to first request |
 | Offline | `HF_HUB_OFFLINE=1 uv run python main.py` | No network (preload first) |
 | Custom Model | `MODEL_NAME=all-MiniLM-L6-v2 uv run python main.py` | Switch default model |
 | Docker | `docker compose up -d` | Containerized deployment |
@@ -289,7 +289,7 @@ All settings are managed via `.env` file or environment variables:
 | `WORKERS` | `1` | Uvicorn workers (set to CPU count in production) |
 | `MAX_BATCH_SIZE` | `32` | Max batch size per encoding call |
 | `MAX_SEQUENCE_LENGTH` | `8192` | Max input tokens |
-| `PRELOAD_MODEL` | `false` | Preload model at startup |
+| `PRELOAD_MODEL` | `true` | Preload model at startup |
 | `ALLOW_MODEL_SWITCH` | `false` | Allow dynamic model switching per request |
 | `EMBEDDING_NORMALIZE` | `true` | L2-normalize output vectors |
 | `HF_ENDPOINT` | `https://hf-mirror.com` | HuggingFace mirror endpoint |

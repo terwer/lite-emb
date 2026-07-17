@@ -41,6 +41,13 @@ class RerankService:
         self._reranker: RerankerBackend | None = None
         self._reranker_model_id: str | None = None
 
+    def preload(self, model_name: str | None = None) -> None:
+        """启动时预加载 Reranker 模型。"""
+        target = model_name or settings.RERANK_MODEL_NAME
+        model_id = ModelRegistry.resolve_model_id(target)
+        logger.info("启动预加载 Reranker: {}", model_id)
+        self._load_reranker(model_id)
+
     def rerank(
         self,
         request: RerankRequest,

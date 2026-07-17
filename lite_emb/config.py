@@ -45,5 +45,11 @@ class Settings(BaseSettings):
     LOG_FILE: str = "logs/app.log"
 
 
+# 预下载模型列表（与 preload.py 保持一致，必须同步更新）
+PRELOAD_MODELS = [
+    "e5-small",
+    "BAAI/bge-reranker-base",
+]
+
 # 全局单例配置实例
 settings = Settings()

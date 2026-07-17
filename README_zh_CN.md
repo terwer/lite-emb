@@ -15,7 +15,7 @@
 | 📦 **自动下载** | CDN + aria2c 带实时进度条下载，缓存本地，一次下载永不再下 |
 | 🔄 **热切换** | 请求中指定不同 `model` 参数即可自动切换，通过 `ALLOW_MODEL_SWITCH` 控制开关（生产环境建议关闭） |
 | 🎯 **多设备适配** | 启动时自动检测 CUDA → MPS → CPU，GPU/MPS 自动启用 fp16，CPU 使用 fp32 |
-| 💤 **懒加载** | 默认不在启动时加载模型，首次 API 请求触发加载。可通过 `PRELOAD_MODEL=true` 改为启动预加载 |
+| 💤 **启动预加载** | 启动时自动加载模型（`PRELOAD_MODEL=true`）。设为 `false` 则首次请求时懒加载 |
 | 🧵 **线程安全** | `threading.Lock` 保护模型加载/卸载临界区，PyTorch 推理天然线程安全，支持多请求并发 |
 | 📐 **维度截断** | 支持 OpenAI 的 `dimensions` 参数，按需截取前 N 维向量，适配不同下游存储需求 |
 | 🐳 **Docker 就绪** | 多阶段构建镜像，内置健康检查，compose 一键编排，HuggingFace 缓存持久化 volume |
@@ -251,7 +251,7 @@ HF_HUB_OFFLINE=1 uv run python main.py
 | 开发模式 | `uv run python main.py` | 本地开发，单进程 |
 | 开发热重载 | `uv run uvicorn lite_emb.app:app --reload` | 代码修改后自动重启 |
 | 生产多 worker | `WORKERS=4 uv run python main.py` | 多核 CPU 并发 |
-| 预加载启动 | `PRELOAD_MODEL=true uv run python main.py` | 避免首次请求冷启动延迟 |
+| 懒加载启动 | `PRELOAD_MODEL=false uv run python main.py` | 首次请求时才加载模型 |
 | 离线启动 | `HF_HUB_OFFLINE=1 uv run python main.py` | 无网络环境（需先 preload） |
 | 指定模型 | `MODEL_NAME=all-MiniLM-L6-v2 uv run python main.py` | 切换默认模型 |
 | Docker | `docker compose up -d` | 容器化部署 |
@@ -288,7 +288,7 @@ docker compose down
 | `WORKERS` | `1` | uvicorn worker 数（生产建议 CPU 核数） |
 | `MAX_BATCH_SIZE` | `32` | 单次编码最大批处理大小 |
 | `MAX_SEQUENCE_LENGTH` | `8192` | 输入文本最大 token 数 |
-| `PRELOAD_MODEL` | `false` | 启动时是否预加载模型 |
+| `PRELOAD_MODEL` | `true` | 启动时是否预加载模型 |
 | `ALLOW_MODEL_SWITCH` | `false` | 是否允许请求中动态切换模型 |
 | `EMBEDDING_NORMALIZE` | `true` | 输出向量是否 L2 归一化 |
 | `HF_ENDPOINT` | `https://hf-mirror.com` | HuggingFace 镜像站 |

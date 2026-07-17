@@ -19,6 +19,7 @@ from lite_emb.logger import setup_logging
 from lite_emb.models.manager import model_manager
 from lite_emb.routers import embeddings, health, models, rerank
 from lite_emb.utils.device import get_device_and_precision
+from lite_emb.utils.preload import preload_models
 
 
 @asynccontextmanager
@@ -45,9 +46,10 @@ async def lifespan(app: FastAPI):
 
     if settings.PRELOAD_MODEL:
         try:
+            preload_models()  # 与 python preload.py 行为 100% 一致
             model_manager.preload(settings.MODEL_NAME)
         except Exception as e:
-            logger.error("预加载模型失败: {}", str(e))
+            logger.error("预加载失败: {}", str(e))
             logger.warning("服务将继续启动，模型将在首次请求时加载")
     else:
         logger.info("模型将在首次请求时懒加载")
