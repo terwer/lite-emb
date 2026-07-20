@@ -18,6 +18,7 @@ from lite_emb.config import settings
 from lite_emb.logger import setup_logging
 from lite_emb.models.manager import model_manager
 from lite_emb.routers import embeddings, health, models, rerank
+from lite_emb.services.rerank_service import rerank_service
 from lite_emb.utils.device import get_device_and_precision
 from lite_emb.utils.preload import preload_models
 
@@ -37,7 +38,8 @@ async def lifespan(app: FastAPI):
     logger.info("=" * 60)
     logger.info("lite-emb 启动中...")
     logger.info("版本: 0.1.0")
-    logger.info("配置模型: {}", settings.MODEL_NAME)
+    logger.info("Embedding 模型: {}", settings.MODEL_NAME)
+    logger.info("Rerank 模型: {}", settings.RERANK_MODEL_NAME)
     logger.info("计算设备: {} (fp16: {})", device, use_fp16)
     logger.info("预加载: {}", settings.PRELOAD_MODEL)
     logger.info("允许模型切换: {}", settings.ALLOW_MODEL_SWITCH)
@@ -46,8 +48,9 @@ async def lifespan(app: FastAPI):
 
     if settings.PRELOAD_MODEL:
         try:
-            preload_models()  # 与 python preload.py 行为 100% 一致
-            model_manager.preload(settings.MODEL_NAME)
+            preload_models()  # 下载 embedding + reranker 到本地
+            model_manager.preload(settings.MODEL_NAME)  # 加载 embedding 到内存
+            rerank_service.preload(settings.RERANK_MODEL_NAME)  # 加载 reranker 到内存
         except Exception as e:
             logger.error("预加载失败: {}", str(e))
             logger.warning("服务将继续启动，模型将在首次请求时加载")

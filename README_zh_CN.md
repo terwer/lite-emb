@@ -15,7 +15,7 @@
 | 📦 **自动下载** | CDN + aria2c 带实时进度条下载，缓存本地，一次下载永不再下 |
 | 🔄 **热切换** | 请求中指定不同 `model` 参数即可自动切换，通过 `ALLOW_MODEL_SWITCH` 控制开关（生产环境建议关闭） |
 | 🎯 **多设备适配** | 启动时自动检测 CUDA → MPS → CPU，GPU/MPS 自动启用 fp16，CPU 使用 fp32 |
-| 💤 **启动预加载** | 启动时自动加载模型（`PRELOAD_MODEL=true`）。设为 `false` 则首次请求时懒加载 |
+| 💤 **启动预加载** | 启动时自动加载 Embedding + Rerank 两个模型（`PRELOAD_MODEL=true`）。设为 `false` 则首次请求时懒加载 |
 | 🧵 **线程安全** | `threading.Lock` 保护模型加载/卸载临界区，PyTorch 推理天然线程安全，支持多请求并发 |
 | 📐 **维度截断** | 支持 OpenAI 的 `dimensions` 参数，按需截取前 N 维向量，适配不同下游存储需求 |
 | 🐳 **Docker 就绪** | 多阶段构建镜像，内置健康检查，compose 一键编排，HuggingFace 缓存持久化 volume |
@@ -305,13 +305,8 @@ HF_HUB_OFFLINE=1 uv run python main.py
 ## Docker 部署
 
 ```bash
-# 构建镜像（不预下载模型）
-docker build -t lite-emb .
-
-# 构建镜像并预下载 BGE-M3
-docker build --build-arg PRELOAD_MODEL=true -t lite-emb .
-
-# 使用 compose 启动
+# 构建并启动
+docker compose build --build-arg USE_APT_MIRROR=true --build-arg USE_PYPI_MIRROR=true
 docker compose up -d
 
 # 查看日志
@@ -320,6 +315,8 @@ docker compose logs -f
 # 停止
 docker compose down
 ```
+
+> 🔑 **国内用户**：需在 Docker Desktop → Settings → Resources → Proxies 配置代理，否则拉取基础镜像会超时。代理只影响 docker daemon 拉取 `python:3.11-slim-bookworm`，容器内部的 apt/pip/模型下载仍走国内源直连。
 
 ## 配置项
 

@@ -19,6 +19,22 @@ from tqdm import tqdm
 from lite_emb.config import settings
 
 _MODEL_FILES: dict[str, list[str]] = {
+    "BAAI/bge-m3": [
+        "config.json",
+        "config_sentence_transformers.json",
+        "tokenizer.json",
+        "tokenizer_config.json",
+        "special_tokens_map.json",
+        "sentencepiece.bpe.model",
+        "modules.json",
+        "1_Pooling/config.json",
+        "sentence_bert_config.json",
+        "model.safetensors.index.json",
+        "model-00001-of-00004.safetensors",
+        "model-00002-of-00004.safetensors",
+        "model-00003-of-00004.safetensors",
+        "model-00004-of-00004.safetensors",
+    ],
     "intfloat/multilingual-e5-base": [
         "config.json",
         "model.safetensors",

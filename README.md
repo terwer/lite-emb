@@ -15,7 +15,7 @@ A lightweight, OpenAI-compatible embedding & rerank service. Embedding aligns wi
 | 📦 **Auto Download** | Downloads models via CDN + aria2c with real-time progress bars. Cached locally, never re-downloads |
 | 🔄 **Hot Swap** | Switch models on the fly by passing a different `model` parameter. Controlled via `ALLOW_MODEL_SWITCH` (recommended off in production) |
 | 🎯 **Device Auto-detect** | CUDA → MPS → CPU, with fp16 on GPU/MPS and fp32 on CPU |
-| 💤 **Eager Loading** | Models preload at startup by default (`PRELOAD_MODEL=true`). Set to `false` for lazy loading on first request |
+| 💤 **Eager Loading** | Preloads both Embedding + Rerank models at startup (`PRELOAD_MODEL=true`). Set to `false` for lazy loading on first request |
 | 🧵 **Thread Safe** | `threading.Lock` guards model load/unload critical sections. PyTorch inference is natively thread-safe for concurrent requests |
 | 📐 **Dimension Truncation** | Supports OpenAI's `dimensions` parameter — truncate vectors to the first N dimensions for downstream storage needs |
 | 🐳 **Docker Ready** | Multi-stage Docker build, built-in health check, compose one-liner, persistent HuggingFace cache volume |
@@ -306,13 +306,8 @@ Request arrives at POST /v1/embeddings
 ## Docker Deployment
 
 ```bash
-# Build image (without pre-downloading the model)
-docker build -t lite-emb .
-
-# Build image with BGE-M3 pre-downloaded
-docker build --build-arg PRELOAD_MODEL=true -t lite-emb .
-
-# Start with compose
+# Build and start
+docker compose build --build-arg USE_APT_MIRROR=true --build-arg USE_PYPI_MIRROR=true
 docker compose up -d
 
 # View logs
@@ -321,6 +316,8 @@ docker compose logs -f
 # Stop
 docker compose down
 ```
+
+> 🔑 **China users**: Configure Docker Desktop → Settings → Resources → Proxies first, otherwise pulling `python:3.11-slim-bookworm` base image will timeout. The proxy only affects the Docker daemon pulling base images — build-stage apt/pip/model downloads still go direct to domestic mirrors.
 
 ## Configuration
 

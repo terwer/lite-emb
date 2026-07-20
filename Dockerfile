@@ -1,16 +1,36 @@
 # lite-emb Docker 镜像
 # 基于 Python 3.11 slim 镜像，使用 uv 管理依赖
+#
+# 国内用户构建时可通过 --build-arg 启用镜像加速：
+#   docker build --build-arg USE_APT_MIRROR=true --build-arg USE_PYPI_MIRROR=true -t lite-emb .
+#   docker compose build --build-arg USE_APT_MIRROR=true --build-arg USE_PYPI_MIRROR=true
 
 FROM python:3.11-slim-bookworm AS builder
 
+# 清空代理（只让 daemon 拉基础镜像时走代理，容器内直连）
+ENV HTTP_PROXY="" HTTPS_PROXY="" http_proxy="" https_proxy=""
+
+# -- 国内镜像加速（默认关闭，国内用户通过 --build-arg 启用） --
+ARG USE_APT_MIRROR=false
+ARG APT_MIRROR=mirrors.aliyun.com
+ARG USE_PYPI_MIRROR=false
+ARG PYPI_MIRROR=https://pypi.tuna.tsinghua.edu.cn/simple
+
 # 安装系统依赖
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN if [ "$USE_APT_MIRROR" = "true" ]; then \
+    sed -i "s|http://deb.debian.org|http://${APT_MIRROR}|g" /etc/apt/sources.list.d/debian.sources; \
+    fi \
+    && apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
 # 安装 uv
-RUN pip install uv --no-cache-dir
+RUN if [ "$USE_PYPI_MIRROR" = "true" ]; then \
+    pip install uv --no-cache-dir -i ${PYPI_MIRROR}; \
+    else \
+    pip install uv --no-cache-dir; \
+    fi
 
 WORKDIR /app
 
@@ -18,15 +38,29 @@ WORKDIR /app
 COPY pyproject.toml .python-version ./
 
 # 安装 Python 依赖
-RUN uv pip install --system -r pyproject.toml
+RUN if [ "$USE_PYPI_MIRROR" = "true" ]; then \
+    uv pip install --system --index-url ${PYPI_MIRROR} -r pyproject.toml; \
+    else \
+    uv pip install --system -r pyproject.toml; \
+    fi
 
 # ============================================================
 # 生产阶段
 # ============================================================
 FROM python:3.11-slim-bookworm AS production
 
+# 清空代理
+ENV HTTP_PROXY="" HTTPS_PROXY="" http_proxy="" https_proxy=""
+
+# -- 国内镜像加速 --
+ARG USE_APT_MIRROR=false
+ARG APT_MIRROR=mirrors.aliyun.com
+
 # 安装运行时系统依赖
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN if [ "$USE_APT_MIRROR" = "true" ]; then \
+    sed -i "s|http://deb.debian.org|http://${APT_MIRROR}|g" /etc/apt/sources.list.d/debian.sources; \
+    fi \
+    && apt-get update && apt-get install -y --no-install-recommends \
     libgomp1 \
     && rm -rf /var/lib/apt/lists/*
 
@@ -52,8 +86,10 @@ RUN if [ "$PRELOAD_MODEL" = "true" ]; then \
 # 创建日志目录
 RUN mkdir -p logs
 
-# 创建非 root 用户
-RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
+# 创建非 root 用户，预先准备缓存目录权限
+RUN useradd -m -u 1000 appuser \
+    && mkdir -p /home/appuser/.cache/huggingface /home/appuser/.cache/lite-emb \
+    && chown -R appuser:appuser /app /home/appuser/.cache
 USER appuser
 
 # 暴露端口
