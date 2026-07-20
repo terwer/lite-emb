@@ -18,7 +18,7 @@ A lightweight, OpenAI-compatible embedding & rerank service. Embedding aligns wi
 | 💤 **Eager Loading** | Preloads both Embedding + Rerank models at startup (`PRELOAD_MODEL=true`). Set to `false` for lazy loading on first request |
 | 🧵 **Thread Safe** | `threading.Lock` guards model load/unload critical sections. PyTorch inference is natively thread-safe for concurrent requests |
 | 📐 **Dimension Truncation** | Supports OpenAI's `dimensions` parameter — truncate vectors to the first N dimensions for downstream storage needs |
-| 🐳 **Docker Ready** | Multi-stage Docker build, built-in health check, compose one-liner, persistent HuggingFace cache volume |
+| 🐳 **Docker Ready** | Multi-stage Docker build, built-in health check, compose one-liner, model cache bind-mounted to local dir |
 | 📝 **Swagger Docs** | Visit `/docs` after startup for full interactive API docs — all schemas include descriptions and examples |
 
 ## Performance Comparison
@@ -325,13 +325,14 @@ All settings are managed via `.env` file or environment variables:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `MODEL_NAME` | `BAAI/bge-m3` | Default model HuggingFace ID |
+| `MODEL_NAME` | `e5-small` | Embedding model (alias or HuggingFace ID) |
+| `RERANK_MODEL_NAME` | `bge-reranker-base` | Rerank model (alias or HuggingFace ID) |
 | `DEV_HOST` | `0.0.0.0` | Listen address |
 | `DEV_PORT` | `8000` | Listen port |
 | `WORKERS` | `1` | Uvicorn workers (set to CPU count in production) |
 | `MAX_BATCH_SIZE` | `32` | Max batch size per encoding call |
-| `MAX_SEQUENCE_LENGTH` | `8192` | Max input tokens |
-| `PRELOAD_MODEL` | `true` | Preload model at startup |
+| `MAX_SEQUENCE_LENGTH` | `512` | Max input tokens |
+| `PRELOAD_MODEL` | `true` | Preload both models at startup |
 | `ALLOW_MODEL_SWITCH` | `false` | Allow dynamic model switching per request |
 | `EMBEDDING_NORMALIZE` | `true` | L2-normalize output vectors |
 | `HF_ENDPOINT` | `https://hf-mirror.com` | HuggingFace mirror endpoint |

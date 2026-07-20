@@ -18,7 +18,7 @@
 | 💤 **启动预加载** | 启动时自动加载 Embedding + Rerank 两个模型（`PRELOAD_MODEL=true`）。设为 `false` 则首次请求时懒加载 |
 | 🧵 **线程安全** | `threading.Lock` 保护模型加载/卸载临界区，PyTorch 推理天然线程安全，支持多请求并发 |
 | 📐 **维度截断** | 支持 OpenAI 的 `dimensions` 参数，按需截取前 N 维向量，适配不同下游存储需求 |
-| 🐳 **Docker 就绪** | 多阶段构建镜像，内置健康检查，compose 一键编排，HuggingFace 缓存持久化 volume |
+| 🐳 **Docker 就绪** | 多阶段构建镜像，内置健康检查，compose 一键编排，模型缓存挂载到本地目录 |
 | 📝 **Swagger 文档** | 启动后访问 `/docs` 即获完整交互式 API 文档，所有 Schema 带 description 和 examples |
 
 ## 性能对比
@@ -324,13 +324,14 @@ docker compose down
 
 | 变量 | 默认值 | 说明 |
 |------|--------|------|
-| `MODEL_NAME` | `BAAI/bge-m3` | 默认模型 HuggingFace ID |
+| `MODEL_NAME` | `e5-small` | Embedding 模型（别名或 HuggingFace ID） |
+| `RERANK_MODEL_NAME` | `bge-reranker-base` | Rerank 模型（别名或 HuggingFace ID） |
 | `DEV_HOST` | `0.0.0.0` | 监听地址 |
 | `DEV_PORT` | `8000` | 监听端口 |
 | `WORKERS` | `1` | uvicorn worker 数（生产建议 CPU 核数） |
 | `MAX_BATCH_SIZE` | `32` | 单次编码最大批处理大小 |
-| `MAX_SEQUENCE_LENGTH` | `8192` | 输入文本最大 token 数 |
-| `PRELOAD_MODEL` | `true` | 启动时是否预加载模型 |
+| `MAX_SEQUENCE_LENGTH` | `512` | 输入文本最大 token 数 |
+| `PRELOAD_MODEL` | `true` | 启动时是否预加载两个模型 |
 | `ALLOW_MODEL_SWITCH` | `false` | 是否允许请求中动态切换模型 |
 | `EMBEDDING_NORMALIZE` | `true` | 输出向量是否 L2 归一化 |
 | `HF_ENDPOINT` | `https://hf-mirror.com` | HuggingFace 镜像站 |
